@@ -1,5 +1,7 @@
 import mongoose,{Schema} from "mongoose";
 
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+
 const viedoSchema=new mongoose(
     {
         viedoFile:{
@@ -39,4 +41,7 @@ const viedoSchema=new mongoose(
 
 },{timestamps:true});
 
-export const Viedo =mongoose.model("Video",viedoSchema)
+
+viedoSchema.plugin(mongooseAggregatePaginate);
+
+export const Viedo =mongoose.model("Video",viedoSchema);
