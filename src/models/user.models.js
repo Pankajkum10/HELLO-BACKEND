@@ -1,5 +1,9 @@
 import mangoose, {Schema} from "mangoose"
 
+import jwt  from "jsonwebtoken"
+
+import bcrypt from "bcrypt"
+
 const UserSchema = new Schema(
     {
         username:{
@@ -19,7 +23,7 @@ const UserSchema = new Schema(
             trim:true,
         }, 
         
-        fullname:{
+        fullName:{
             type:String,
             required:true,
             trim:true,
@@ -56,6 +60,50 @@ const UserSchema = new Schema(
         timestamps:true
     }
 )
+
+UserSchema.pre("save",async function(next){
+
+    if(!this.isModified("password"))
+    this.password = bcrypt.hash(this.password,10)
+    next()
+})
+
+UserSchema.methods.isPasswordCorrect = async function (password){
+
+    return await bcrypt.compare(password, this.password)
+}
+UserSchema.methods.generateAccessToken =function(){
+
+   return jwt.sign({
+
+
+        _id:this._id,
+        username:this.username,
+        email:this.email,
+        fullname:this.fullName
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+        expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+    }
+) },
+UserSchema.methods.generateRefreshToken =function(){
+
+    return jwt.sign({
+ 
+ 
+         _id:this._id,
+         
+     },
+     process.env.EFRESH_TOKEN_SECRET,
+     {
+         expiresIn:process.env.REFRESH_TOKEN_EXPIRY
+     }
+ ) },
+ 
+
+
+UserSchema.methods.generateRefreshToken=function(){}
 
 export const User = mangoose.model("User",UserSchema)
 
